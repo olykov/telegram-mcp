@@ -1,0 +1,47 @@
+---
+- name: Deploy Telegram MCP application
+  hosts: app
+  become: yes
+  vars:
+    work_dir: /opt/telegram-mcp
+
+  tasks:
+    - name: Ensure work directory exists
+      tags: ["app"]
+      ansible.builtin.file:
+        path: "{{ work_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Prepare environment variables
+      tags: ["app", "env"]
+      ansible.builtin.copy:
+        dest: "{{ work_dir }}/.env"
+        content: |
+          APP_IMAGE={{ lookup('env', 'APP_IMAGE') }}
+          APP_TAG={{ lookup('env', 'APP_TAG') }}
+          TELEGRAM_API_ID={{ lookup('env', 'TELEGRAM_API_ID') }}
+          TELEGRAM_API_HASH='{{ lookup('env', 'TELEGRAM_API_HASH') }}'
+          TELEGRAM_SESSION_STRING='{{ lookup('env', 'TELEGRAM_SESSION_STRING') }}'
+
+    - name: Ensure docker-compose.yml is updated
+      tags: ["app"]
+      ansible.builtin.template:
+        src: "{{inventory_dir}}/../docker-compose.yaml"
+        dest: "{{ work_dir }}/docker-compose.yml"
+      register: _docker_compose
+
+    - name: Check and manage container
+      tags: ["app"]
+      block:
+        - name: Ensure app container is absent
+          community.docker.docker_compose_v2:
+            project_src: "{{ work_dir }}"
+            state: absent
+
+        - name: Ensure app container is running
+          community.docker.docker_compose_v2:
+            project_src: "{{ work_dir }}"
+            pull: always
+            state: present
+          register: _docker_compose

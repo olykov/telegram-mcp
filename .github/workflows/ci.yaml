@@ -1,0 +1,60 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  BUILD_TAG: ${{ github.run_number }}-${{ github.sha }}
+  APP_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/telegram-mcp
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Telegram MCP Docker image
+        run: |
+          docker build -f Dockerfile -t ${{ env.APP_IMAGE }}:${{ env.BUILD_TAG }} .
+          docker push ${{ env.APP_IMAGE }}:${{ env.BUILD_TAG }}
+
+  deploy:
+    needs: [build-app]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Ansible
+        run: sudo apt update && sudo apt install -y ansible
+
+      - name: Install Ansible requirements
+        run: |
+          ansible-galaxy install -f -r ansible/requirements.yaml
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_ADDRESS }} >> ~/.ssh/known_hosts
+
+      - name: Run Ansible Playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          SERVER_ADDRESS: "${{ secrets.SERVER_ADDRESS }}"
+          SERVER_USER: "${{ secrets.SERVER_USER }}"
+          SERVER_PORT: "${{ secrets.SERVER_PORT }}"
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TELEGRAM_SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
+          APP_IMAGE: ${{ env.APP_IMAGE }}
+          APP_TAG: ${{ env.BUILD_TAG }}
+        run: ansible-playbook -i ansible/inventory.yaml ansible/deploy.yaml
