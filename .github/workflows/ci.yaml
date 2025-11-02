@@ -52,9 +52,9 @@ jobs:
           SERVER_ADDRESS: "${{ secrets.SERVER_ADDRESS }}"
           SERVER_USER: "${{ secrets.SERVER_USER }}"
           SERVER_PORT: "${{ secrets.SERVER_PORT }}"
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-          TELEGRAM_SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
+          TELEGRAM_API_ID: ${{ secrets.API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.API_HASH }}
+          TELEGRAM_SESSION_STRING: ${{ secrets.SESSION }}
           APP_IMAGE: ${{ env.APP_IMAGE }}
           APP_TAG: ${{ env.BUILD_TAG }}
         run: ansible-playbook -i ansible/inventory.yaml ansible/deploy.yaml
