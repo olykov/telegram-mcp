@@ -27,7 +27,7 @@
     - name: Ensure docker-compose.yml is updated
       tags: ["app"]
       ansible.builtin.template:
-        src: "{{inventory_dir}}/../docker-compose.yaml"
+        src: "{{inventory_dir}}/../docker-compose.yml"
         dest: "{{ work_dir }}/docker-compose.yml"
       register: _docker_compose
 
