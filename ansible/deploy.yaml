@@ -13,6 +13,13 @@
         state: directory
         mode: '0755'
 
+    - name: Copy session string generator
+      tags: ["app"]
+      ansible.builtin.copy:
+        src: "{{inventory_dir}}/../session_string_generator.py"
+        dest: "{{ work_dir }}/session_string_generator.py"
+        mode: '0755'
+
     - name: Prepare environment variables
       tags: ["app", "env"]
       ansible.builtin.copy:
