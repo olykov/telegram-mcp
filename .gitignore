@@ -202,3 +202,7 @@ test_upload.txt
 test_voice.ogg
 sticker.webp
 two.png
+
+# Local Docker Compose overrides
+docker-compose.local.yml
+docker-compose.override.yml

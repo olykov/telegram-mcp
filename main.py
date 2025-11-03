@@ -547,7 +547,11 @@ async def list_messages(
             # Use server-side search alone, then enforce date bounds client-side.
             params["search"] = search_query
             messages = []
-            async for msg in client.iter_messages(entity, **params):  # newest -> oldest
+            # Fetch messages as a list instead of using lazy iterator
+            messages_list = await run_in_main_loop(
+                client.get_messages(entity, limit=min(limit * 5, 1000), **params)
+            )
+            for msg in messages_list:
                 if to_date_obj and msg.date > to_date_obj:
                     continue
                 if from_date_obj and msg.date < from_date_obj:
@@ -563,9 +567,13 @@ async def list_messages(
                 messages = []
                 if from_date_obj:
                     # Walk forward from start date (oldest -> newest)
-                    async for msg in client.iter_messages(
-                        entity, offset_date=from_date_obj, reverse=True
-                    ):
+                    messages_list = await run_in_main_loop(
+                        client.get_messages(
+                            entity, limit=min(limit * 5, 1000),
+                            offset_date=from_date_obj, reverse=True
+                        )
+                    )
+                    for msg in messages_list:
                         if to_date_obj and msg.date > to_date_obj:
                             break
                         if msg.date < from_date_obj:
@@ -575,11 +583,15 @@ async def list_messages(
                             break
                 else:
                     # Only upper bound: walk backward from end bound
-                    async for msg in client.iter_messages(
-                        # offset_date is exclusive; +1µs makes to_date inclusive
-                        entity,
-                        offset_date=to_date_obj + timedelta(microseconds=1),
-                    ):
+                    messages_list = await run_in_main_loop(
+                        client.get_messages(
+                            # offset_date is exclusive; +1µs makes to_date inclusive
+                            entity,
+                            limit=min(limit * 5, 1000),
+                            offset_date=to_date_obj + timedelta(microseconds=1),
+                        )
+                    )
+                    for msg in messages_list:
                         messages.append(msg)
                         if len(messages) >= limit:
                             break
