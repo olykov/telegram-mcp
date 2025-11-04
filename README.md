@@ -1,6 +1,36 @@
-# Telegram MCP Server
----
+# Telegram MCP Server (streamable-http)
+
 This is a Telegram MCP server that allows you to interact with your Telegram account via HTTP.
+
+# How to run
+
+0. Get your API credentials at [my.telegram.org/apps](https://my.telegram.org/apps).
+1. Copy `.env.example` to `.env` and fill only
+  - TELEGRAM_API_ID
+  - TELEGRAM_API_HASH
+
+2. Run `session_string_generator.py`.
+3. Copy the session string from the output and paste it into the .env file.
+
+Your .env now looks like this
+```
+TELEGRAM_API_ID=your_api_id_here
+TELEGRAM_API_HASH=your_api_hash_here
+TELEGRAM_SESSION_NAME=anon
+TELEGRAM_SESSION_STRING=your_session_string_here
+```
+
+4. run `docker-compose -f docker-compose.local.yml up -d`
+5. You can see that it's up om http://localhost:8004/mcp but to test it see next step
+
+Optional: 
+1. Download Anthropic MCP inspector: `npx @modelcontextprotocol/inspector`
+2. Setup all default with 
+    - Transport Type: `Streamable HTTP`
+    - URL: `http://localhost:8004/mcp`
+3. Go to `tools` and feel free to test all your MCP tools
+
+# Available methods
 
 ### Chat & Group Management
 - **get_chats(page, page_size)**: Paginated list of chats
@@ -83,24 +113,6 @@ This is a Telegram MCP server that allows you to interact with your Telegram acc
 - **archive_chat(chat_id)**: Archive a chat
 - **unarchive_chat(chat_id)**: Unarchive a chat
 - **get_recent_actions(chat_id)**: Get recent admin actions
-
-### 3. Generate a Session String
-
-```bash
-uv run session_string_generator.py
-```
-Follow the prompts to authenticate and update your `.env` file.
-
-### 4. Configure .env
-
-Copy `.env.example` to `.env` and fill in your values:
-
-```
-TELEGRAM_API_ID=your_api_id_here
-TELEGRAM_API_HASH=your_api_hash_here
-TELEGRAM_SESSION_NAME=anon
-TELEGRAM_SESSION_STRING=your_session_string_here
-```
-Get your API credentials at [my.telegram.org/apps](https://my.telegram.org/apps).
-
 ---
+
+Source: [telegram-mcp by chigwell](https://github.com/chigwell/telegram-mcp)

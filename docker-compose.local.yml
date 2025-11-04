@@ -1,0 +1,14 @@
+services:
+  telegram-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: telegram-mcp
+    environment:
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - TELEGRAM_SESSION_STRING=${TELEGRAM_SESSION_STRING}
+      - TELEGRAM_SESSION_NAME=${TELEGRAM_SESSION_NAME}
+    ports:
+      - "8004:8000"
+    restart: unless-stopped
