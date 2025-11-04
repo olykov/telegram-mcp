@@ -488,7 +488,7 @@ async def get_contact_ids() -> str:
 async def list_messages(
     chat_id: Union[int, str],
     limit: int = 20,
-    search_query: str = None,
+    search_query: Optional[str] = None,
     from_date: str = None,
     to_date: str = None,
 ) -> str:
@@ -623,7 +623,7 @@ async def list_topics(
     chat_id: int,
     limit: int = 200,
     offset_topic: int = 0,
-    search_query: str = None,
+    search_query: Optional[str] = None,
 ) -> str:
     """
     Retrieve forum topics from a supergroup with the forum feature enabled.
